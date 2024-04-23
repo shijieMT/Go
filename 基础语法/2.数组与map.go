@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func func2() {
 	var array [3]int = [3]int{1, 2, 3}
@@ -50,6 +53,13 @@ func func2() {
 	slices := list5[:] // 左一刀，右一刀  变成了切片
 	fmt.Println(slices)
 	fmt.Println(list5[1:2]) // b
+	//切片排序
+	var list6 = []int{4, 5, 3, 2, 7}
+	fmt.Println("排序前:", list6)
+	sort.Ints(list6)
+	fmt.Println("升序:", list6)
+	sort.Sort(sort.Reverse(sort.IntSlice(list6)))
+	fmt.Println("降序:", list6)
 	//Go语言中的map(映射、字典)是一种内置的数据结构，它是一个无序的key-value对的集合
 	//map的key必须是基本数据类型，value可以是任意类型
 	// 声明
