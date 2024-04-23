@@ -136,6 +136,22 @@ func 循环() {
 			break
 		}
 	}
-	// continue 跳过本轮循环
 
+	// 遍历切片
+	// 第一个参数是索引，第二个参数是对应的值
+	s := []string{"枫枫", "知道"}
+	for index, s2 := range s {
+		fmt.Println(index, s2)
+	}
+	//遍历map
+	//第一个参数就是key，第二个就是value
+	s1 := map[string]int{
+		"age":   24,
+		"price": 1000,
+	}
+	for key, val := range s1 {
+		fmt.Println(key, val)
+	}
+	// break用于跳出当前循环
+	// continue 跳过本轮循环
 }
