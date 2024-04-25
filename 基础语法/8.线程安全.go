@@ -63,6 +63,10 @@ func writer() {
 	wait_func8.Done()
 }
 
+/*
+sync.Map 可以存储任意类型的键（key）和值（value）。在Go语言中，sync.Map 是一个并发安全的map，它允许你存储和检索键值对，而不需要担心并发访问的问题。
+*/
+
 var mp_sync = sync.Map{}
 
 func reader_sync() {
