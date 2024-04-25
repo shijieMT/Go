@@ -139,7 +139,7 @@ func 循环() {
 
 	// 遍历切片
 	// 第一个参数是索引，第二个参数是对应的值
-	s := []string{"枫枫", "知道"}
+	s := []string{"2024年4月25日20:23:18", "2024-4-25 20:24:01", "hahhhahha"}
 	for index, s2 := range s {
 		fmt.Println(index, s2)
 	}
