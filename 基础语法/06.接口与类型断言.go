@@ -9,8 +9,9 @@ func func6() {
 
 	接口()
 	类型断言()
+	空接口()
 	//使用技巧
-	解析JSON()
+	// 解析JSON()
 }
 
 // 接口是一组仅包含方法名、参数、返回值的未具体实现的方法的集合
@@ -104,8 +105,21 @@ func (c Cat) jump() {
 func (c Cat) rap() {
 	fmt.Println(c.Name + " rap")
 }
-
 func 类型断言() {
 	var c = Cat{"叮当猫"}
 	judge_animal(c)
+}
+
+//
+
+func PrintAnyValue1(v interface{}) {
+	fmt.Println(v)
+}
+func PrintAnyValue2(v any) {
+	fmt.Println(v)
+}
+func 空接口() {
+	// interface{}
+	PrintAnyValue1("123")
+	PrintAnyValue2("123")
 }
