@@ -1,0 +1,8 @@
+Gin官方文档：
+https://gin-gonic.com/zh-cn/docs/introduction/
+
+配置第三方的代理地址。我们再Settings->Go->Go Modules->Environment下面配上代理地址。
+GOPROXY=https://goproxy.cn,direct
+
+下载gin（需要有go.mod文件）
+go get -u github.com/gin-gonic/gin
