@@ -10,7 +10,28 @@ import (
 博客链接：
 https://gitee.com/moxi159753/LearningNotes/tree/master/Golang/Gin%E6%A1%86%E6%9E%B6/1_Gin%E5%86%85%E5%AE%B9%E4%BB%8B%E7%BB%8D#gin%E4%B8%AD%E9%97%B4%E4%BB%B6
 */
+/*
+gin中间件中使用goroutine
+当在中间件或handler中启动新的goroutine时，不能使用原始的上下文（c *gin.Context），必须使用其只读副本（c.Copy()）。
+	// 定义一个中间件，它将在每个请求处理之前执行
+	router.Use(func(c *gin.Context) {
+		// 创建上下文的只读副本
+		cCopy := c.Copy()
 
+		// 在新的goroutine中使用副本
+		go func() {
+			// 模拟一些耗时的操作
+			time.Sleep(2 * time.Second)
+
+			// 使用副本获取请求的路径
+			path := cCopy.Request.URL.Path
+			log.Printf("Request path in goroutine: %s", path)
+
+			// 假设我们在这里处理一些异步任务
+			// ...
+		}()
+	})
+*/
 // todo 了解中间件
 func func12() {
 	// 创建一个新的Gin路由器实例
