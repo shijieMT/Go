@@ -6,3 +6,7 @@ GOPROXY=https://goproxy.cn,direct
 
 下载gin（需要有go.mod文件）
 go get -u github.com/gin-gonic/gin
+
+基于gin框架和gorm的web开发实战 (七米出品)
+博客：https://liwenzhou.com/
+同学博客：https://gitee.com/moxi159753/LearningNotes/tree/master/Golang/Gin
