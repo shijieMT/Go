@@ -23,8 +23,8 @@ protoc
 ## 安装gRPC核心库（新版）
 
 ~~~go
-go instal1 google.go7ang.org/protobuf/cmd/protoc-gen-go@latest
-go instal1 google.go7ang.org/grpc/cmd/protoc-gen-go-grpc@latest
+go instal1 google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go instal1 google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 ~~~
 # 学习资料
 ## 码神之路
