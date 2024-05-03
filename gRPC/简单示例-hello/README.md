@@ -37,7 +37,10 @@ message HelloReply {
 > 代码同上
 ## 代码生成
 进入proto文件夹下，执行代码
+>  **.**   代表目录  
+>  **hello.proto**   为文件名
 ~~~dos
 protoc --go_out=. hello.proto
 protoc --go-grpc_out=. hello.proto
 ~~~
+
