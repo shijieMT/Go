@@ -43,4 +43,54 @@ message HelloReply {
 protoc --go_out=. hello.proto
 protoc --go-grpc_out=. hello.proto
 ~~~
+## 生成文件
+> proto/hello.pb.go  （内含结构体定义）
+
+~~~go
+...
+// 定义 Hello 请求的消息结构
+type HelloRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"` // 客户端发送的参数
+}
+...
+// 定义 Hello 响应的消息结构
+type HelloReply struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"` // 服务端返回的消息
+}
+...
+~~~
+> hello_grpc.pb.go  （内含方法实现）
+~~~go hello.pb.go
+...
+type HelloServiceClient interface {
+	// 定义一个 RPC 方法，客户端可以通过该方法发送 Hello 请求
+	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error)
+}
+
+type helloServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewHelloServiceClient(cc grpc.ClientConnInterface) HelloServiceClient {
+	return &helloServiceClient{cc}
+}
+
+func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, HelloService_SayHello_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+...
+~~~
 
