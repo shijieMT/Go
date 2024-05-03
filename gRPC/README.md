@@ -21,7 +21,6 @@ protoc
 1. 定义了一种源文件，扩展名为 `.proto`，使用这种源文件，可以定义存储类的内容(消息类型)
 2. protobuf有自己的编译器 `protoc`，可以将 `.proto` 编译成对应语言的文件，就可以进行使用了
 ## 安装gRPC核心库（新版）
-> 下面两个插件已经包含在gRPC核心库中，直接install
 ~~~go
 go get google.golang.org/grpc
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
