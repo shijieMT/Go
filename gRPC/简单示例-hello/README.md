@@ -93,4 +93,17 @@ func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opt
 }
 ...
 ~~~
+## 代码编写
+### 服务端编写 todo
+创建gRPC Server 对象，你可以理解为它是 Server 端的抽象对象
+将 server (其包含需要被调用的服务端接口)注册到gRPC Server的内部注册中心。
+这样可以在接受到请求时，通过内部的服务发现，发现该服务端接口并转接进行逻辑处理
+创建Listen，监听TCP端口
+gRPC Server开始lis.Accept，直到Stop
+### 客户端编写 todo
+客户端编写
+创建与给定目标(服务端)的连接交互
+创建server的客户端对象
+发送RPC请求，等待同步响应，得到回调后返回响应结果
+输出响应结果
 
