@@ -24,8 +24,8 @@ protoc
 > 下面两个插件已经包含在gRPC核心库中，直接install
 ~~~go
 go get google.golang.org/grpc
-go instal1 google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go instal1 google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 ~~~
 # 学习资料
 ## 码神之路
