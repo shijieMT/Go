@@ -94,7 +94,7 @@ func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opt
 ...
 ~~~
 ## 代码编写
-### 服务端编写
+### 1. 服务端编写
 > 1. 开启TCP端口监听
 > 2. 创建一个gRPC服务器实例
 > 3. 注册gRPC服务到服务器实例中
@@ -148,7 +148,7 @@ func main() {
 	// 服务器启动后，将一直运行，直到程序被外部中断或调用Stop方法
 }
 ~~~
-### 客户端编写
+### 2. 客户端编写
 > 1. 创建与给定目标(服务端)的连接交互
 > 2. 创建server的客户端对象
 > 3. 执行RPC调用，等待同步响应，得到响应结果
@@ -199,3 +199,33 @@ func main() {
 }
 
 ~~~
+## 验证准备工作
+### 1. 生成自签证书
+
+> 生产环境可以购买证书或者使用一些平台发放的免费证书
+
+
+
+* 安装openssl
+
+  网站下载：http://slproweb.com/products/Win32OpenSSL.html
+
+* 生成私钥文件
+
+  ~~~shell
+  ## 需要输入密码
+  openssl genrsa -des3 -out ca.key 2048
+  ~~~
+
+* 创建证书请求
+
+  ~~~shell
+  openssl req -new -key ca.key -out ca.csr
+  ~~~
+
+* 生成ca.crt
+
+  ~~~shell
+  openssl x509 -req -days 365 -in ca.csr -signkey ca.key -out ca.crt
+  ~~~
+
