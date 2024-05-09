@@ -10,13 +10,17 @@ go get gorm.io/gorm
 ```
 ## 设计表结构
 ```go
-/* 
-    CREATE TABLE Students (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(255) NOT NULL,
-    Email VARCHAR(255)
-    );
- */
+/*
+CREATE TABLE `students` (
+  `name` varchar(12) NOT NULL COMMENT '用户名',
+  `uuid` varchar(191) NOT NULL COMMENT '主键',
+  `s_email` varchar(32) DEFAULT NULL,
+  `s_y_addr` varchar(16) DEFAULT NULL,
+  `s_gender` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`uuid`),
+  UNIQUE KEY `uuid` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+*/
 type StudentInfo struct {
     Email  *string `gorm:"size:32"` // 使用指针是为了存空值
     Addr   string  `gorm:"column:y_addr;size:16"`
