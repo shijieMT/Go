@@ -18,14 +18,14 @@ go get gorm.io/gorm
     );
  */
 type StudentInfo struct {
-Email  *string `gorm:"size:32"` // 使用指针是为了存空值
-Addr   string  `gorm:"column:y_addr;size:16"`
-Gender bool    `gorm:"default:true"`
+    Email  *string `gorm:"size:32"` // 使用指针是为了存空值
+    Addr   string  `gorm:"column:y_addr;size:16"`
+    Gender bool    `gorm:"default:true"`
 }
 type Student struct {
-Name string      `gorm:"type:varchar(12);not null;comment:用户名"`
-UUID string      `gorm:"primaryKey;unique;comment:主键"`
-Info StudentInfo `gorm:"embedded;embeddedPrefix:s_"`
+    Name string      `gorm:"type:varchar(12);not null;comment:用户名"`
+    UUID string      `gorm:"primaryKey;unique;comment:主键"`
+    Info StudentInfo `gorm:"embedded;embeddedPrefix:s_"`
 }
 ```
 ## 连接数据库
