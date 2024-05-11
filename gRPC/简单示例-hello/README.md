@@ -1,4 +1,4 @@
-# 示例编写步骤
+# 简单示例编写步骤
 ## proto文件编写
 ### 客户端
 > hello-client/proto/hello.proto
