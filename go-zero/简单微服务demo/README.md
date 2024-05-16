@@ -1,7 +1,7 @@
 # 编写简单微服务demo
 ## go-zero训练：根据要求编写对应微服务demo编写（rpc和api）
-> 服务端实现getUser服务，接受id，返回id，name，gender  
-> 客户端实现getVideo服务，get请求，接受id，返回id和name（根据id调用getUser获取对应name）  
+> 服务端实现User服务（内含getUser方法），接受id，返回id，name，gender  
+> 客户端实现getVideo服务（内含getVideo方法），get请求，接受id，返回id和name（根据id调用getUser获取对应name）  
 > [参考资料](https://go-zero.dev/docs/tasks)
 ## 编写user模块
 ### 编写proto文件
