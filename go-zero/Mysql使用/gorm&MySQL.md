@@ -1,19 +1,5 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # gorm 结合 go-zero
-
 
 ## models编写
 ### 下载mysql的驱动
