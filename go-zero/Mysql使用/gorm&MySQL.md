@@ -2,6 +2,14 @@
 # gorm 结合 go-zero
 
 ## models编写
+```go
+package models
+
+type UserModel struct {
+	Username string `gorm:"size:32" json:"username"`
+	Password string `gorm:"size:64" json:"password"`
+}
+```
 ### 下载mysql的驱动
 ```shell
 go get gorm.io/driver/mysql
