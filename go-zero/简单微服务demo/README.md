@@ -130,7 +130,7 @@ UserRpc:
       - 127.0.0.1:2379
     Key: user.rpc
 ```
-### 完善服务依赖 todo（两个服务依赖有什么区别？）
+### 完善服务依赖
 video/api/internal/logic/getvideologic.go
 ```go
 ...
