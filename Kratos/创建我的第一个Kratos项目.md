@@ -1,16 +1,10 @@
-# 一、体验Kratos项目helloworld
+# 一、体验helloworld项目
 ### 1. 创建项目
 ```shell
-# 安装依赖
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
-go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
-go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
-go install github.com/google/wire/cmd/wire@latest
-# 创建项目-helloworld
 kratos new helloworld
 ```
+运行时，调整工作目录为main.go所在目录 helloworld/cmd/helloworld/main.go
 ### ~~2. 编写proto文件~~(跳过，转到第三步)
 ```shell
 kratos proto add api/helloworld/v1/demo.proto
@@ -57,6 +51,8 @@ message HelloReply {
 ```
 ### 3. 运行程序
 ```shell
+# 安装依赖
+go get github.com/google/wire/cmd/wire@latest
 go mod tidy
 # 运行项目
 kratos run
@@ -163,7 +159,7 @@ func (s *DemoService) SayHello(ctx context.Context, req *v1.HelloRequest) (*v1.H
 	return &v1.HelloReply{Message: "看到界面时，您已完成整个流程"}, nil
 }
 ```
-修改service.go
+修改service
 ```go
 package service
 
@@ -172,8 +168,8 @@ import "github.com/google/wire"
 // ProviderSet is service providers.
 var ProviderSet = wire.NewSet(NewDemoService)
 ```
-#### 2.4. 修改internal/server 的grpc和http文件（修改标红部分）  
-   grpc代码修改
+#### 2.4. 修改internal/server 的grpc和http文件（修改标红部分）
+grpc代码修改
 ```go
 package server
 
@@ -266,3 +262,192 @@ http://127.0.0.1:8000/helloworld/Shijie
     "message": "看到界面时，您已完成整个流程"
 }
 ```
+# 三、连接数据库与配置修改
+### 1. 准备数据库实例
+创建helloworld/deploy/mysql/docker-compose.yaml文件
+```yaml
+version: '3'
+services:
+  demo_db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: dangerous
+      MYSQL_DATABASE: demo # for database creation automatically
+    ports:
+      - 3306:3306
+    volumes:
+      - "./data:/var/lib/mysql"
+```
+启动数据库，成功
+### 2. 引入gorm
+使用gorm(此处默认您已经有过gorm的使用经验了)  
+[以前写的简易gorm使用指南](https://github.com/shijieMT/Go/tree/main/Gorm)
+```shell
+go get gorm.io/driver/mysql
+go get gorm.io/gorm
+```
+### 3. 修改 helloworld/internal/data/data.go
+3.1. 新增NewDB方法  
+3.2. 修改NewData方法  
+3.3. 将NewDB添加到ProviderSet  
+```go
+package data
+
+import (
+	"fmt"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"helloworld/internal/conf"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/wire"
+)
+
+// ProviderSet is data providers.
+var ProviderSet = wire.NewSet(NewData, NewDB, NewGreeterRepo)
+
+// Data .
+type Data struct {
+	DB *gorm.DB
+}
+
+// NewData .
+func NewData(c *conf.Data, logger log.Logger, db *gorm.DB) (*Data, func(), error) {
+	cleanup := func() {
+		log.NewHelper(logger).Info("closing the data resources")
+	}
+	return &Data{DB: db}, cleanup, nil
+}
+
+// NewDB .
+func NewDB(c *conf.Data, logger log.Logger) *gorm.DB {
+	username := "root"      //账号
+	password := "dangerous" //密码
+	host := "127.0.0.1"     //数据库地址，可以是Ip或者域名
+	port := 3306            //数据库端口
+	Dbname := "demo"        //数据库名
+	timeout := "10s"        //连接超时，10秒
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local&timeout=%s", username, password, host, port, Dbname, timeout)
+	db, err := gorm.Open(mysql.Open(dsn))
+	if err != nil {
+		panic(err)
+	}
+	if err := db.AutoMigrate(); err != nil {
+		panic(err)
+	}
+	return db
+}
+```
+### 4. 更新wire_gen.go
+```shell
+go run -mod=mod github.com/google/wire/cmd/wire
+```
+成功生成新的wire_gen.go
+### 5. 将dsn添加到配置文件
+#### 5.1. 更改 helloworld/configs/config.yaml
+```yaml
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+data:
+  database:
+    username : "root"
+    password : "dangerous"
+    host : "127.0.0.1"
+    port : 3306
+    Dbname : "demo"
+    timeout : "10s"
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+```
+#### 5.2. 更改 helloworld/internal/conf/conf.proto 中的 Data部分（使其与配置文件结构一致）
+```protobuf
+syntax = "proto3";
+package kratos.api;
+
+option go_package = "helloworld/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message Bootstrap {
+  Server server = 1;
+  Data data = 2;
+}
+
+message Server {
+  message HTTP {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+  message GRPC {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+  HTTP http = 1;
+  GRPC grpc = 2;
+}
+
+message Data {
+  message Database {
+    string username = 1;
+    string password = 2;
+    string host = 3;
+    int64 port = 4;
+    string Dbname = 5;
+    string timeout = 6;
+  }
+  message Redis {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration read_timeout = 3;
+    google.protobuf.Duration write_timeout = 4;
+  }
+  Database database = 1;
+  Redis redis = 2;
+}
+```
+#### 5.3. 根据 conf.proto生成 conf.pb.go
+项目路径下执行：
+```shell
+# Win
+protoc --proto_path=./internal --proto_path=./third_party --go_out=paths=source_relative:./internal ./internal/conf/conf.proto
+# Mac
+make config
+```
+#### 5.4. 更改 helloworld/internal/data/data.go（使用配置文件中的信息构建dsn）
+此处只放了 func NewDB，其他部分不变
+```go
+// NewDB .
+func NewDB(c *conf.Data, logger log.Logger) *gorm.DB {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local&timeout=%s",
+		c.Database.Username,
+		c.Database.Password,
+		c.Database.Host,
+		c.Database.Port,
+		c.Database.Dbname,
+		c.Database.Timeout,
+	)
+	db, err := gorm.Open(mysql.Open(dsn))
+	if err != nil {
+		panic(err)
+	}
+	if err := db.AutoMigrate(); err != nil {
+		panic(err)
+	}
+	return db
+}
+```
+#### 5.5. 尝试运行，看是否通过编译
+```shell
+kratos run
+```
+没问题，进入下一步
