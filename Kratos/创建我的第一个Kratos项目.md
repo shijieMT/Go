@@ -451,7 +451,7 @@ func NewDB(c *conf.Data, logger log.Logger) *gorm.DB {
 kratos run
 ```
 没问题，进入下一步
-# 三、 
+# 四、 在项目中使用数据库，修改对应代码
 ### 1. 更改biz文件夹下的内容
 #### 1.1. 新建 helloworld/internal/biz/demo.go
 仿照greeter.go编写repo和usercase
@@ -590,7 +590,8 @@ kratos run
 
 所以，我们先实现data，然后实现biz，再实现service，生成wire_gen后运行，  
 此时调用api，就可以完成我们想要的逻辑了
-### 7. 分析wire_gen 的注入逻辑  
+# 五、 分析依赖注入顺序及代码编写思路
+### 1. 分析wire_gen 的注入逻辑  
 注入顺序：
 ```text
 1. db           ->  NewDB(confData, logger)  
@@ -610,3 +611,5 @@ service     ->      Service
 server      ->      http & grpc Server
 main        ->      app
 ```
+### 2. 整理代码编写思路
+todo
