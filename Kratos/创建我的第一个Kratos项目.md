@@ -451,3 +451,162 @@ func NewDB(c *conf.Data, logger log.Logger) *gorm.DB {
 kratos run
 ```
 没问题，进入下一步
+# 三、 
+### 1. 更改biz文件夹下的内容
+#### 1.1. 新建 helloworld/internal/biz/demo.go
+仿照greeter.go编写repo和usercase
+```go
+package biz
+
+import (
+	"context"
+
+	v1 "helloworld/api/helloworld/v1"
+
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/log"
+)
+
+var (
+	// ErrUserNotFound is user not found.
+	ErrUserNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
+)
+
+// Demo is a Demo model.
+type Demo struct {
+	Hello string
+}
+
+// DemoRepo is a Greater repo.
+type DemoRepo interface {
+	Save(context.Context, *Demo) (*Demo, error)
+	ListAll(context.Context) ([]*Demo, error)
+}
+
+// DemoUsecase is a Demo usecase.
+type DemoUsecase struct {
+	repo DemoRepo
+	log  *log.Helper
+}
+
+// NewDemoUsecase new a Demo usecase.
+func NewDemoUsecase(repo DemoRepo, logger log.Logger) *DemoUsecase {
+	return &DemoUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+// CreateDemo creates a Demo, and returns the new Demo.
+func (uc *DemoUsecase) CreateDemo(ctx context.Context, g *Demo) (*Demo, error) {
+	uc.log.WithContext(ctx).Infof("CreateDemo: %v", g.Hello)
+	return uc.repo.Save(ctx, g)
+}
+```
+#### 1.2. 更改biz.go
+```go
+package biz
+
+import "github.com/google/wire"
+
+// ProviderSet is biz providers.
+var ProviderSet = wire.NewSet(NewDemoUsecase)
+```
+### 2. 更改data文件夹下的内容
+#### 2.1. 更新data.go的ProviderSet
+```go
+// ProviderSet is data providers.
+var ProviderSet = wire.NewSet(NewData, NewDB, NewDemoRepo)
+```
+#### 2.2. 更改demo.go(方法暂时保持空实现)
+```go
+package data
+
+import (
+	"github.com/go-kratos/kratos/v2/log"
+	"helloworld/internal/biz"
+
+	"context"
+)
+
+type DemoRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+// NewDemoRepo .
+func NewDemoRepo(data *Data, logger log.Logger) biz.DemoRepo {
+	return &DemoRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func (r *DemoRepo) Save(ctx context.Context, g *biz.Demo) (*biz.Demo, error) {
+	return g, nil
+}
+
+func (r *DemoRepo) ListAll(context.Context) ([]*biz.Demo, error) {
+	return nil, nil
+}
+```
+### 3. 更改service中使用的UserCase（填之前没改的坑）
+```go
+package service
+
+import (
+	"context"
+
+	v1 "helloworld/api/helloworld/v1"
+	"helloworld/internal/biz"
+)
+
+type DemoService struct {
+	v1.UnimplementedDemoServer
+
+	uc *biz.DemoUsecase
+}
+
+// NewDemoService new a Demo service.
+func NewDemoService(uc *biz.DemoUsecase) *DemoService {
+	return &DemoService{uc: uc}
+}
+
+func (s *DemoService) SayHello(ctx context.Context, req *v1.HelloRequest) (*v1.HelloReply, error) {
+	return &v1.HelloReply{Message: "看到界面时，您已完成整个流程"}, nil
+}
+```
+### 4. 更改完毕，重新生成wire_gen.go
+```shell
+go run -mod=mod github.com/google/wire/cmd/wire
+```
+### 5. 运行程序，看是否通过编译
+```shell
+kratos run
+```
+成功运行，继续（如果MySQL没启动，会报MySQL连接失败）
+### 6. 分析数据流向，按照自己的思路编写代码
+此时，我们可以发现：  
+> data文件夹中编写了操作数据库的方法（如func Save），  
+> biz（业务逻辑的组装层）文件夹中的 func CreateDemo调用了 func Save，把数据库的数据封装成结构体对象（实例），  
+> service（api 定义的服务层）文件夹中的 func SayHello可以调用 func CreateDemo，拿到实例对象，进行后续操作
+
+所以，我们先实现data，然后实现biz，再实现service，生成wire_gen后运行，  
+此时调用api，就可以完成我们想要的逻辑了
+### 7. 分析wire_gen 的注入逻辑  
+注入顺序：
+```text
+1. db           ->  NewDB(confData, logger)  
+2. dataData     ->  data.NewData(confData, logger, db)  
+3. demoRepo     ->  data.NewDemoRepo(dataData, logger)  
+4. demoUsecase  ->  biz.NewDemoUsecase(demoRepo, logger)  
+5. demoService  ->  service.NewDemoService(demoUsecase)  
+6. grpcServer   ->  server.NewGRPCServer(confServer, demoService, logger)  
+7. httpServer   ->  server.NewHTTPServer(confServer, demoService, logger)  
+8. app          ->  newApp(logger, grpcServer, httpServer)  
+```
+文件与对应实体：
+```text
+data        ->      repo
+biz         ->      Usecase
+service     ->      Service
+server      ->      http & grpc Server
+main        ->      app
+```
