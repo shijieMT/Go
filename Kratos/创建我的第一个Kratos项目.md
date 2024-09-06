@@ -586,7 +586,10 @@ kratos run
 此时，我们可以发现：  
 > data文件夹中编写了操作数据库的方法（如func Save），  
 > biz（业务逻辑的组装层）文件夹中的 func CreateDemo调用了 func Save，把数据库的数据封装成结构体对象（实例），  
-> service（api 定义的服务层）文件夹中的 func SayHello可以调用 func CreateDemo，拿到实例对象，进行后续操作
+> service（api 定义的服务层）文件夹中的 func SayHello可以调用 func CreateDemo，拿到实例对象，进行后续操作  
+
+> [!TIP]  
+> 按照DDD编写的话，biz属于domain层，应该把与数据库有关的结构体定义和方法放在data层，封装成结构体对象这一步应该放在data而不是biz
 
 所以，我们先实现data，然后实现biz，再实现service，生成wire_gen后运行，  
 此时调用api，就可以完成我们想要的逻辑了
@@ -612,4 +615,8 @@ server      ->      http & grpc Server
 main        ->      app
 ```
 ### 2. 整理代码编写思路
-todo
+data中编写数据库操作相关代码，并将数据封装为结构体对象  
+biz中编写业务逻辑方法，调用data中的方法  
+service中实现接口逻辑，调用biz中的方法  
+
+
